@@ -2,6 +2,12 @@
   "name": "@gideon/eslint-config-react",
   "version": "1.0.0",
   "description": "My preferred eslint config for React projects",
+  "author": "Gideon Spierings <gideongideon@gmail.com>",
+  "homepage": "https://github.com/Gideonnn/eslint-config-react",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Gideonnn/eslint-config-react.git"
+  },
   "license": "WTFPL",
   "main": "index.js",
   "files": [
