@@ -1,0 +1,108 @@
+name: publish
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  CI: true
+  CACHE_TOKEN: 3a2bf1fc
+
+jobs:
+  version:
+    name: version check
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: Get local version
+        id: local_version
+        run: |
+          version=$(cat ./package.json | jq --raw-output .version)
+          echo $version
+          echo ::set-output name=value::$version
+
+      - name: Prepare .npmrc
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}" >> .npmrc
+          cat .npmrc
+
+      - name: Get registry version
+        id: registry_version
+        run: |
+          name=$(cat ./package.json | jq --raw-output .name)
+          echo $name
+          if version=$(npm view $name version); then
+            echo $version
+            echo ::set-output name=value::$version
+          else
+            echo "::error:: Package '$name' not found on registry: $NPM_REGISTRY"
+          fi
+
+      - name: Validate version
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
+          script: |
+            const local_version = '${{ steps.local_version.outputs.value }}';
+            const registry_version = '${{ steps.registry_version.outputs.value }}';
+            core.info(`Repository version: ${local_version}`);
+            core.info(`Registry version: ${registry_version}`);
+            if (registry_version === local_version) {
+              core.setFailed('Please bump version before merging');
+            }
+
+  publish:
+    runs-on: ubuntu-18.04
+    needs: version
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: Prepare .npmrc
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}" >> .npmrc
+          cat .npmrc
+
+      - name: Publish
+        run: yarn publish
+
+      - name: Get local version
+        id: local_version
+        run: |
+          version=$(cat ./package.json | jq --raw-output .version)
+          echo $version
+          echo ::set-output name=value::$version
+
+      - name: Create tag
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const obj = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "refs/tags/v${{ steps.local_version.outputs.value }}",
+              sha: context.sha
+            };
+            console.log(obj);
+            github.git.createRef(obj);
