@@ -8,6 +8,7 @@ on:
 env:
   CI: true
   CACHE_TOKEN: 3a2bf1fc
+  NPM_REGISTRY: https://registry.npmjs.org/
 
 jobs:
   version:
@@ -19,6 +20,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: "16"
+          registry-url: ${{ env.NPM_REGISTRY }}
 
       - name: Context
         env:
@@ -31,11 +33,6 @@ jobs:
           version=$(cat ./package.json | jq --raw-output .version)
           echo $version
           echo ::set-output name=value::$version
-
-      - name: Prepare .npmrc
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}" >> .npmrc
-          cat .npmrc
 
       - name: Get registry version
         id: registry_version
@@ -72,19 +69,17 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: "16"
+          registry-url: ${{ env.NPM_REGISTRY }}
 
       - name: Context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
 
-      - name: Prepare .npmrc
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}" >> .npmrc
-          cat .npmrc
-
       - name: Publish
-        run: yarn publish
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
       - name: Get local version
         id: local_version

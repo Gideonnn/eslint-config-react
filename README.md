@@ -1,11 +1,11 @@
-# Gideonnn's eslint config
+# Gideon's eslint config
 
 My personal React eslint setup for React projects. Feel free to use it any way you like.
 
 ## Installation
 
 ```
-yarn add -D @gideonnn/eslint-config-react
+yarn add -D @gideon/eslint-config-react
 ```
 
 Install required `peerDependencies`:
@@ -18,7 +18,7 @@ Import in `package.json`:
 
 ```
 "eslintConfig": {
-  "extends": "@gideonnn/eslint-config-react"
+  "extends": "@gideon/eslint-config-react"
 },
 ```
 
@@ -45,7 +45,7 @@ Instead of using `package.json`, you can also import this config in your `.eslin
 
 ```
 module.exports = {
-  extends: "@gideonnn/eslint-config-react",
+  extends: "@gideon/eslint-config-react",
   rules: {
     "simple-import-sort/exports": "off",
   },
