@@ -11,7 +11,7 @@ yarn add -D @gideon/eslint-config-react
 Install required `peerDependencies`:
 
 ```
-yarn add -D eslint eslint-config-prettier eslint-config-standard-react eslint-plugin-import eslint-plugin-prettier eslint-plugin-promise eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-simple-import-sort typescript @typescript-eslint/eslint-plugin @typescript-eslint/parser
+yarn add -D eslint
 ```
 
 Import in `package.json`:
